@@ -1,9 +1,9 @@
 import os
 import numpy as np
 
-from discobolus.nhl.api.objects import Teams, Team, Schedule
-from discobolus.nhl.api.utils import lookup_team_id
-
+from discobolus.data.nhlapi.objects import Teams, Team, Schedule
+from discobolus.data.nhlapi.utils import lookup_team_id
+import csv
 from discobolus.nhl import img_dir
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -26,8 +26,9 @@ def matrix_counts2pct(mat, total):
 
 def process_grid_coords(tuples):
     mtrx = gen_grid_matrix()
+
     for tup in tuples:
-        playX, playY = tup[0], tup[1]
+        playX, playY = float(tup[0]), float(tup[1])
 
         playX_grid = int(abs(playX))
         playY_grid = int(playY + 42.0)
@@ -57,7 +58,7 @@ def process_grid_coords(tuples):
             else:
                 mtrx[playX_grid, playY_grid] += 1
 
-    return mtrx
+    return mtrx, len(tuples)
 
 
 def goalCoords(team=None, season_start=2014, season_end=2019):
@@ -65,9 +66,10 @@ def goalCoords(team=None, season_start=2014, season_end=2019):
     print("constructing goal matrix")
     agg_coords = []
 
-    if os.path.isfile('sample_data.txt'):
-        with open('sample_data.txt', 'r') as d:
-            tuples = d.readlines()
+    if os.path.isfile('sample_data.csv'):
+        with open('sample_data.csv', 'r') as d:
+            readr = csv.reader(d)
+            tuples = [row for row in readr]
 
     else:
         tuples = []
@@ -87,16 +89,17 @@ def goalCoords(team=None, season_start=2014, season_end=2019):
             for game in sched:
                 tuples.extend([(p.coordinates['x'], p.coordinates['y']) for p in game.plays.scoring if len(p.coordinates) == 2])
 
-    if os.path.isfile('sample_data.txt'):
-        with open("sample_data.txt", mode='w') as f:
-            for t in tuples:
-                tup_str = str(t) +'\n'
-                f.write(tup_str)
+    if os.path.isfile('sample_data.csv'):
+        with open("sample_data.csv", mode='w') as f:
+            writr = csv.writer(f)
+            tups_strings = [[str(t[0]), str(t[1])] for t in tuples]
+            writr.writerows(tups_strings)
+
     else:
-        with open("sample_data.txt", mode='a') as f:
-            for t in tuples:
-                tup_str = str(t) +'\n'
-                f.write(tup_str)
+        with open("sample_data.csv", mode='a') as f:
+            writr = csv.writer(f)
+            tups_strings = [[str(t[0]), str(t[1])] for t in tuples]
+            writr.writerows(tups_strings)
 
     return process_grid_coords(tuples=tuples)
 
@@ -128,6 +131,40 @@ scale_red = [[0.0, "rgb(255,255,255)"],
              [1.0, "rgb(198,0,0)"]]
 
 
+scale_orange_red = [[0.0, '#FFFFFF'],
+                    [0.1, '#F09C00'],
+                    [0.2, "#E28A00"],
+                    [0.3, "#D57800"],
+                    [0.4, "#C76600"],
+                    [0.5, "#BA5400"],
+                    [0.6, "#AD4200"],
+                    [0.7, "#9F3000"],
+                    [0.8, "#921E00"],
+                    [0.9, "#850D00"],
+                    [1.0, "#610A00"]]
+
+
+scale_red_green = [[1.0, '#FF0000'],
+                   [0.95, '#F20C00'],
+                   [0.90, '#E51900'],
+                   [0.85, "#D82600"],
+                   [0.8, '#CC3300'],
+                   [0.75, '#BF3F00'],
+                   [0.7, "#B24C00"],
+                   [0.65, "#A55900"],
+                   [0.6, "#996600"],
+                   [0.55, "#8C7200"],
+                   [0.50, "#7F7F00"],
+                   [0.45, "#728C00"],
+                   [0.40, "#669900"],
+                   [0.35, "#59A500"],
+                   [0.30, '#4CB200'],
+                   [0.25, '#3FBF00'],
+                   [0.20, '#33CC00'],
+                   [0.15, '#26D800'],
+                   [0.10, '#19E500'],
+                   [0.05, '#0CF200'],
+                   [0.0, '#FFFFFF']][::-1]
 
 # #blue gradient scale
 # color_scale = [[0., "rgb(255,255,255)"],
@@ -143,25 +180,25 @@ scale_red = [[0.0, "rgb(255,255,255)"],
 #                [1.0, "rgb(5, 6, 43)"]]
 #
 
-def gen_heatmap(z):
-    bg = os.path.join(img_dir, 'hockeyrink.gif')
-
-    heatmap = go.Heatmap(z=z, colorscale=scale_yellow_red)
+def gen_heatmap(z, plot_title):
+    bg = "https://github.com/dtemkin/discobolus/blob/master/discobolus/nhl/img/hockeyrink.gif"
+    heatmap = go.Heatmap(z=z, colorscale=scale_red_green, opacity=1.0)
     layout = dict(
+        title=plot_title,
         images=[dict(
-            source=bg,
-            xref="x",
-            yref="y",
-            sizex=86,
-            sizey=100,
-            x=0,
-            y=86,
-            sizing="stretch",
-            opacity=1,
-            layer="below",
             visible=True,
-            xanchor="left",
-            yanchor="top"
+            source=bg,
+            xref="paper",
+            yref="paper",
+            sizex=1.0,
+            sizey=1.0,
+            x=.50,
+            y=0,
+            sizing="stretch",
+            opacity=.2,
+            layer='above',
+            xanchor="center",
+            yanchor="bottom"
         )]
     )
 
@@ -169,7 +206,7 @@ def gen_heatmap(z):
     py.plot(fig)
 
 
-matrix = goalCoords(season_start=2018, season_end=2018)
-gen_heatmap(z=matrix)
+matrix, total = goalCoords(season_start=2012, season_end=2019)
+gen_heatmap(z=matrix, plot_title="NHL Regular Season Goals Heatmap (2012-2019) [All Teams]")
 
 

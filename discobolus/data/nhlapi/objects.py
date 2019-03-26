@@ -1,7 +1,8 @@
-from discobolus.nhl.api import UserList, UserDict
-from discobolus.nhl.api.base import BaseEndpoint
-from discobolus.nhl.api.utils import get_logo, get_team_colors, get_num_regular_games
+from discobolus.data.nhlapi import UserList, UserDict
+from discobolus.data.nhlapi.base import BaseEndpoint
+from discobolus.data.nhlapi.utils import get_logo, get_team_colors, get_num_regular_games
 from datetime import datetime
+
 
 class Plays(UserDict, BaseEndpoint):
 
@@ -66,54 +67,53 @@ class Plays(UserDict, BaseEndpoint):
         return self['allPlays'][self['currentPlay']]
 
 
-    # @property
-    # def takeaways(self):
-    #     return iter(Plays._event_code_filter(self.all, "TAKEAWAY"))
-    #
-    # @property
-    # def giveaways(self):
-    #     return iter(Plays._event_code_filter(self.all, "GIVEAWAY"))
-    #
-    # @property
-    # def shots(self):
-    #     return iter(Plays._event_code_filter(self.all, "SHOT"))
-    #
-    # @property
-    # def stops(self):
-    #     return iter(Plays._event_code_filter(self.all, "STOP"))
-    #
-    # @property
-    # def slapshots(self):
-    #     return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Slap Shot'))
-    #
-    # @property
-    # def snapshots(self):
-    #     return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code="Snap Shot"))
-    #
-    # @property
-    # def wristshots(self):
-    #     return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Wrist Shot'))
-    #
-    # @property
-    # def backhand_shots(self):
-    #     return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Backhand'))
-    #
-    # @property
-    # def shot_blocks(self):
-    #     return iter(Plays._event_code_filter(self.all, "BLOCKED_SHOT"))
-    #
-    # @property
-    # def missed_shots(self):
-    #     return iter(Plays._event_code_filter(self.all, "MISSED_SHOT"))
-    #
-    # @property
-    # def hits(self):
-    #     return iter(Plays._event_code_filter(self.all, 'HIT'))
-    #
-    # @property
-    # def fights(self):
-    #     return iter(Plays._subevent_code_filter(self.all, "PENALTY", "Fighting"))
-    #
+    @property
+    def takeaways(self):
+        return iter(Plays._event_code_filter(self.all, "TAKEAWAY"))
+
+    @property
+    def giveaways(self):
+        return iter(Plays._event_code_filter(self.all, "GIVEAWAY"))
+
+    @property
+    def shots(self):
+        return iter(Plays._event_code_filter(self.all, "SHOT"))
+
+    @property
+    def stops(self):
+        return iter(Plays._event_code_filter(self.all, "STOP"))
+
+    @property
+    def slapshots(self):
+        return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Slap Shot'))
+
+    @property
+    def snapshots(self):
+        return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code="Snap Shot"))
+
+    @property
+    def wristshots(self):
+        return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Wrist Shot'))
+
+    @property
+    def backhand_shots(self):
+        return iter(Plays._subevent_code_filter(self.all, primary_code='SHOT', secondary_code='Backhand'))
+
+    @property
+    def shot_blocks(self):
+        return iter(Plays._event_code_filter(self.all, "BLOCKED_SHOT"))
+
+    @property
+    def missed_shots(self):
+        return iter(Plays._event_code_filter(self.all, "MISSED_SHOT"))
+
+    @property
+    def hits(self):
+        return iter(Plays._event_code_filter(self.all, 'HIT'))
+
+    @property
+    def fights(self):
+        return iter(Plays._subevent_code_filter(self.all, "PENALTY", "Fighting"))
 
 
 class Play(UserDict):
